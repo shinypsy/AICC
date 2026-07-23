@@ -1,0 +1,227 @@
+:root {
+  --bg: #0f1419;
+  --panel: #1a2332;
+  --text: #e8eef7;
+  --muted: #8b9bb4;
+  --accent: #3d8bfd;
+  --accent-hot: #ff5c5c;
+  --ok: #3ecf8e;
+  --line: #2a3648;
+  --font: "Pretendard", "Noto Sans KR", "Segoe UI", sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: var(--font);
+  color: var(--text);
+  background:
+    radial-gradient(1200px 600px at 10% -10%, #1e3a5f 0%, transparent 55%),
+    radial-gradient(900px 500px at 100% 0%, #243049 0%, transparent 50%),
+    var(--bg);
+}
+
+.wrap {
+  width: min(640px, 92vw);
+  margin: 0 auto;
+  padding: 2.5rem 0 3rem;
+}
+
+header h1 {
+  margin: 0.2rem 0 0.6rem;
+  font-size: 1.75rem;
+  letter-spacing: -0.02em;
+}
+
+.eyebrow {
+  margin: 0;
+  color: var(--accent);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.sub {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.panel {
+  margin-top: 1.1rem;
+  padding: 1.1rem 1.2rem;
+  background: color-mix(in srgb, var(--panel) 92%, black);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+}
+
+.panel h2 {
+  margin: 0 0 0.7rem;
+  font-size: 0.95rem;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.35rem 0;
+}
+
+.label { color: var(--muted); font-size: 0.9rem; }
+
+.badge {
+  font-size: 0.85rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  background: #243044;
+  border: 1px solid var(--line);
+}
+
+.badge.ok { color: var(--ok); border-color: color-mix(in srgb, var(--ok) 40%, var(--line)); }
+.badge.hot { color: var(--accent-hot); border-color: color-mix(in srgb, var(--accent-hot) 40%, var(--line)); }
+.badge.warn { color: #f0c674; }
+
+.mic-panel { text-align: center; }
+
+.talk-btn {
+  width: 180px;
+  height: 180px;
+  border: 0;
+  border-radius: 50%;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: white;
+  cursor: pointer;
+  background: radial-gradient(circle at 35% 30%, #5aa2ff, var(--accent) 45%, #1f4f9a);
+  box-shadow: 0 12px 30px rgba(61, 139, 253, 0.35);
+  transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+}
+
+.talk-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.talk-btn.recording {
+  background: radial-gradient(circle at 35% 30%, #ff8a8a, var(--accent-hot) 50%, #a12323);
+  box-shadow: 0 12px 30px rgba(255, 92, 92, 0.4);
+  transform: scale(1.03);
+}
+
+.hint {
+  margin: 1rem 0 0.6rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.no-mic-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  margin-top: 0.8rem;
+}
+
+.file-btn,
+.secondary-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.65rem 1rem;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: #243044;
+  color: var(--text);
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.secondary-btn:disabled,
+.file-btn:has(input:disabled) {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.demo-audio {
+  width: 100%;
+  margin-top: 0.9rem;
+}
+
+.level-wrap {
+  height: 8px;
+  border-radius: 999px;
+  background: #243044;
+  overflow: hidden;
+}
+
+.level {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--accent), #7c5cff);
+  transition: width 0.08s linear;
+}
+
+.transcript {
+  margin: 0 0 1rem;
+  min-height: 2.4rem;
+  font-size: 1.15rem;
+  line-height: 1.55;
+  white-space: pre-wrap;
+}
+
+.answer {
+  margin: 0;
+  min-height: 3.2rem;
+  font-size: 1.15rem;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  color: #d7e8ff;
+}
+
+.rag-meta {
+  margin: 0.5rem 0 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.ask-row {
+  display: flex;
+  gap: 0.6rem;
+  margin-top: 0.85rem;
+}
+
+.ask-row input {
+  flex: 1;
+  min-width: 0;
+  padding: 0.65rem 0.8rem;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: #121a26;
+  color: var(--text);
+  font-size: 0.92rem;
+}
+
+.log {
+  margin: 1rem 0 0;
+  padding: 0;
+  list-style: none;
+  max-height: 180px;
+  overflow: auto;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.log li {
+  padding: 0.35rem 0;
+  border-top: 1px solid var(--line);
+}
