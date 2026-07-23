@@ -225,3 +225,67 @@ header h1 {
   padding: 0.35rem 0;
   border-top: 1px solid var(--line);
 }
+
+.call-panel { text-align: center; }
+
+.call-stage { padding: 0.4rem 0 0.2rem; }
+
+.call-btn {
+  width: min(100%, 280px);
+  height: 64px;
+  border: 0;
+  border-radius: 999px;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: white;
+  cursor: pointer;
+  background: linear-gradient(135deg, #3ecf8e, #1f9d63);
+  box-shadow: 0 10px 24px rgba(62, 207, 142, 0.28);
+}
+
+.call-btn:disabled { opacity: 0.45; }
+
+.hang-btn {
+  margin-top: 1.1rem;
+  width: min(100%, 220px);
+  height: 48px;
+  border: 0;
+  border-radius: 999px;
+  font-size: 1rem;
+  font-weight: 700;
+  color: white;
+  cursor: pointer;
+  background: linear-gradient(135deg, #ff7b7b, #c62828);
+}
+
+.call-timer {
+  margin: 0 0 0.8rem;
+  font-size: 1.6rem;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.06em;
+  color: var(--ok);
+}
+
+.access-hint {
+  margin: 0.7rem 0 0;
+  white-space: pre-wrap;
+  color: #f0c674;
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.extras summary {
+  cursor: pointer;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.extras[open] summary { margin-bottom: 0.8rem; }
+
+@media (max-width: 480px) {
+  .wrap { width: 94vw; padding: 1.2rem 0 2.5rem; }
+  header h1 { font-size: 1.45rem; }
+  .talk-btn { width: 168px; height: 168px; }
+  .ask-row { flex-direction: column; }
+  .panel { padding: 1rem; }
+}

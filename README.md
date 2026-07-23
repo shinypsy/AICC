@@ -1,43 +1,47 @@
-# AICC — VoIP + STT + RAG + TTS (1~4단계)
+# AICC — 모바일 브라우저 VoIP + STT + RAG + TTS
 
 ```
-질문 → Whisper(STT) → 지식 RAG → MMS-TTS(음성) → 브라우저 재생
+모바일 브라우저 → 통화 연결 → 말하기 → Whisper → FAQ → MMS-TTS 재생
 ```
 
-## 실행
+## 모바일에서 쓰는 방법 (중요)
+
+모바일 브라우저는 **마이크에 HTTPS**가 필요합니다.
+
+### 1) PC에서 HTTPS 서버 실행
 
 ```powershell
 cd d:\Dev\Project\AICC
 .\.venv\Scripts\Activate.ps1
+pip install cryptography
+python voip_server.py --https
+```
+
+### 2) 폰과 PC를 같은 Wi‑Fi에 연결
+
+화면에 안내된 주소로 접속합니다. 예:
+
+`https://192.168.0.91:8000/`
+
+- 처음엔 **인증서 경고**가 뜹니다 → 고급 → 계속 진행(또는 방문)
+- **통화 연결** → 마이크 허용
+- **탭해서 말하기** → 다시 탭해서 전송
+- 답변 음성이 나오면 통화 유지한 채 이어서 질문 가능
+- **통화 종료**
+
+### 3) PC 방화벽
+
+포트 `8000` 인바운드를 허용해야 폰에서 접속됩니다.
+
+## PC 전용 (HTTP)
+
+```powershell
 python voip_server.py
 ```
 
-브라우저: http://127.0.0.1:8000/
+`http://127.0.0.1:8000/` — PC 브라우저 테스트용
 
-## 구성
+## FAQ 문서
 
-| 단계 | 기술 | 비고 |
-|------|------|------|
-| 1 VoIP | 브라우저 WebSocket | Softphone/Twilio 불필요 |
-| 2 STT | faster-whisper | 오픈소스 |
-| 3 RAG | `knowledge/faq.md` 검색 | 문서 있으면 인용, 없으면 고정 멘트 |
-| 4 TTS | **Meta MMS-TTS Korean** | 오픈소스, 로컬 |
-
-문서에 없는 질문에는 기본으로  
-`답변이 곤란합니다. 상담사 연결을 원하시면 말씀해 주세요.`  
-를 응답합니다. (`RAG_MIN_SCORE`, `RAG_FALLBACK_MESSAGE`로 조정)
-
-## 테스트
-
-1. **텍스트로 질문** → 답변 텍스트 + 음성 자동 재생  
-2. **데모: 주차 문의** → TTS→STT→RAG→TTS  
-3. 마이크가 있으면 **눌러서 말하기**
-
-## 설정
-
-`.env` 예:
-
-```
-TTS_ENABLED=1
-TTS_MODEL=facebook/mms-tts-kor
-```
+`knowledge/faq.md`  
+없으면: `답변이 곤란합니다. 상담사 연결을 원하시면 말씀해 주세요.`

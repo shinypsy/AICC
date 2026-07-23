@@ -9,3 +9,4 @@ __pycache__/
 samples/
 tools/
 models/
+certs/

@@ -11,7 +11,7 @@ import tempfile
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from fastapi import FastAPI, File, Form, UploadFile, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, File, Form, Request, UploadFile, WebSocket, WebSocketDisconnect
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
@@ -84,7 +84,35 @@ def health() -> dict:
         "no_mic_test": True,
         "rag": True,
         "tts": True,
+        "mobile_call": True,
     }
+
+
+@app.get("/api/access")
+def access_info(request: Request) -> dict:
+    """모바일 접속용 URL 안내."""
+    import socket
+
+    https = request.url.scheme == "https"
+    scheme = "https" if https else "http"
+    port = request.url.port or (443 if https else 80)
+    ips: set[str] = set()
+    try:
+        for info in socket.getaddrinfo(socket.gethostname(), None, socket.AF_INET):
+            ips.add(info[4][0])
+    except OSError:
+        pass
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        ips.add(s.getsockname()[0])
+        s.close()
+    except OSError:
+        pass
+    urls = [f"{scheme}://{ip}:{port}/" for ip in sorted(ips) if not ip.startswith("127.")]
+    if not urls:
+        urls = [f"{scheme}://127.0.0.1:{port}/"]
+    return {"https": https, "urls": urls, "port": port}
 
 
 def _make_demo_wav(text: str, out_path: Path) -> None:
@@ -253,6 +281,31 @@ async def ws_voice(websocket: WebSocket) -> None:
 
 
 if __name__ == "__main__":
+    import argparse
+
     import uvicorn
 
-    uvicorn.run("voip_server:app", host="0.0.0.0", port=PORT, reload=False)
+    parser = argparse.ArgumentParser(description="AICC VoIP 서버")
+    parser.add_argument(
+        "--https",
+        action="store_true",
+        help="모바일 마이크용 self-signed HTTPS로 실행",
+    )
+    parser.add_argument("--port", type=int, default=PORT)
+    args = parser.parse_args()
+
+    kwargs: dict = {
+        "app": "voip_server:app",
+        "host": "0.0.0.0",
+        "port": args.port,
+        "reload": False,
+    }
+    if args.https:
+        from gen_ssl import CERT_FILE, KEY_FILE, generate
+
+        if not CERT_FILE.exists() or not KEY_FILE.exists():
+            generate()
+        kwargs["ssl_certfile"] = str(CERT_FILE)
+        kwargs["ssl_keyfile"] = str(KEY_FILE)
+        print(f"[HTTPS] https://<이 PC IP>:{args.port}/  (인증서 경고는 고급→계속)")
+    uvicorn.run(**kwargs)

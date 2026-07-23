@@ -2,42 +2,65 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>AICC VoIP STT RAG</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#0f1419" />
+  <title>AICC 모바일 통화</title>
   <link rel="stylesheet" href="/static/style.css" />
 </head>
 <body>
   <main class="wrap">
     <header>
-      <p class="eyebrow">AICC Test · Phase 1–4</p>
-      <h1>VoIP + STT + RAG + TTS</h1>
-      <p class="sub">말하면 Whisper가 인식하고, RAG가 답한 뒤 오픈소스 TTS로 읽어 줍니다.</p>
+      <p class="eyebrow">AICC Mobile VoIP</p>
+      <h1>상담 통화</h1>
+      <p class="sub">모바일 브라우저에서 통화를 연결한 뒤 질문하면, FAQ 답변을 음성으로 들려줍니다.</p>
     </header>
 
     <section class="panel status-panel">
       <div class="row">
-        <span class="label">연결</span>
+        <span class="label">서버</span>
         <span id="conn" class="badge">대기</span>
+      </div>
+      <div class="row">
+        <span class="label">통화</span>
+        <span id="callState" class="badge">대기</span>
       </div>
       <div class="row">
         <span class="label">상태</span>
         <span id="status" class="badge">idle</span>
       </div>
+      <p id="accessHint" class="access-hint"></p>
     </section>
 
-    <section class="panel mic-panel">
-      <button id="talk" type="button" class="talk-btn" disabled>
-        눌러서 말하기
-      </button>
-      <p class="hint">버튼을 <strong>누르고 있는 동안</strong> 녹음됩니다. 손을 떼면 STT → RAG가 실행됩니다.</p>
-      <div class="level-wrap" aria-hidden="true">
-        <div id="level" class="level"></div>
+    <section class="panel call-panel">
+      <div id="preCall" class="call-stage">
+        <button id="callBtn" type="button" class="call-btn">통화 연결</button>
+        <p class="hint">같은 Wi‑Fi에서 이 PC 주소로 접속한 뒤 눌러 주세요. 마이크 권한을 허용해야 합니다.</p>
+      </div>
+
+      <div id="inCall" class="call-stage" hidden>
+        <p id="callTimer" class="call-timer">00:00</p>
+        <button id="talk" type="button" class="talk-btn" disabled>탭해서 말하기</button>
+        <p class="hint" id="talkHint">한 번 탭 → 녹음 시작 / 다시 탭 → 전송(STT→답변)</p>
+        <div class="level-wrap" aria-hidden="true">
+          <div id="level" class="level"></div>
+        </div>
+        <button id="hangBtn" type="button" class="hang-btn">통화 종료</button>
       </div>
     </section>
 
     <section class="panel">
-      <h2>마이크 없이 테스트</h2>
-      <p class="hint" style="margin-top:0">데모 음성(주차 문의), 파일 업로드, 또는 텍스트 질문으로 RAG를 확인할 수 있습니다.</p>
+      <h2>인식(질문)</h2>
+      <p id="transcript" class="transcript">아직 없음</p>
+      <h2>RAG 답변</h2>
+      <p id="answer" class="answer">아직 없음</p>
+      <p id="ragMeta" class="rag-meta"></p>
+      <audio id="answerAudio" controls playsinline class="demo-audio" style="display:none"></audio>
+    </section>
+
+    <details class="panel extras">
+      <summary>마이크 없이 / PC 테스트</summary>
       <div class="no-mic-actions">
         <label class="file-btn">
           오디오 파일 선택
@@ -49,18 +72,9 @@
         <input id="askInput" type="text" placeholder="예: 업무시간이 어떻게 되나요?" value="엘리베이터 고장나면 어떻게 해요?" />
         <button id="askBtn" type="button" class="secondary-btn">텍스트로 질문</button>
       </div>
-      <audio id="demoAudio" controls class="demo-audio" style="display:none"></audio>
-    </section>
-
-    <section class="panel">
-      <h2>인식(질문)</h2>
-      <p id="transcript" class="transcript">아직 없음</p>
-      <h2>RAG 답변</h2>
-      <p id="answer" class="answer">아직 없음</p>
-      <p id="ragMeta" class="rag-meta"></p>
-      <audio id="answerAudio" controls class="demo-audio" style="display:none"></audio>
+      <audio id="demoAudio" controls playsinline class="demo-audio" style="display:none"></audio>
       <ul id="log" class="log"></ul>
-    </section>
+    </details>
   </main>
   <script src="/static/app.js"></script>
 </body>
