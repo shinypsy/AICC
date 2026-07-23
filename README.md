@@ -20,8 +20,12 @@ python voip_server.py
 |------|------|------|
 | 1 VoIP | 브라우저 WebSocket | Softphone/Twilio 불필요 |
 | 2 STT | faster-whisper | 오픈소스 |
-| 3 RAG | `knowledge/faq.md` 검색 + (가능 시) OpenAI | 할당량 없으면 문서 인용 |
-| 4 TTS | **Meta MMS-TTS Korean** (`facebook/mms-tts-kor`) | 오픈소스, 로컬 |
+| 3 RAG | `knowledge/faq.md` 검색 | 문서 있으면 인용, 없으면 고정 멘트 |
+| 4 TTS | **Meta MMS-TTS Korean** | 오픈소스, 로컬 |
+
+문서에 없는 질문에는 기본으로  
+`답변이 곤란합니다. 상담사 연결을 원하시면 말씀해 주세요.`  
+를 응답합니다. (`RAG_MIN_SCORE`, `RAG_FALLBACK_MESSAGE`로 조정)
 
 ## 테스트
 

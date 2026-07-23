@@ -37,3 +37,10 @@ WHISPER_LANGUAGE = os.getenv("WHISPER_LANGUAGE", "ko").strip()
 # TTS (오픈소스 Meta MMS)
 TTS_MODEL = os.getenv("TTS_MODEL", "facebook/mms-tts-kor").strip()
 TTS_ENABLED = os.getenv("TTS_ENABLED", "1").strip() not in {"0", "false", "False"}
+
+# FAQ 문서 매칭 (미달 시 고정 멘트)
+RAG_MIN_SCORE = float(os.getenv("RAG_MIN_SCORE", "0.35"))
+RAG_FALLBACK_MESSAGE = os.getenv(
+    "RAG_FALLBACK_MESSAGE",
+    "답변이 곤란합니다. 상담사 연결을 원하시면 말씀해 주세요.",
+).strip()

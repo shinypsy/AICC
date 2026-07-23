@@ -1,4 +1,8 @@
-"""문서 기반 RAG — 검색 + LLM 답변."""
+"""문서 기반 FAQ 답변.
+
+문서에 있으면 해당 내용을 읽고, 없으면 고정 멘트로 응답합니다.
+(OpenAI 없이도 AI 상담처럼 동작)
+"""
 
 from __future__ import annotations
 
@@ -7,7 +11,7 @@ from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
 
-from config import AI_SYSTEM_PROMPT, OPENAI_API_KEY, OPENAI_MODEL, ROOT
+from config import RAG_FALLBACK_MESSAGE, RAG_MIN_SCORE, ROOT
 
 KNOWLEDGE_DIR = ROOT / "knowledge"
 
@@ -74,7 +78,6 @@ def retrieve(query: str, top_k: int = 3) -> list[dict]:
     for ch in chunks:
         tokens = _tokenize(ch.text)
         overlap = len(q & tokens)
-        # 제목 일치에 가중치
         title_tokens = _tokenize(ch.title)
         overlap += 1.5 * len(q & title_tokens)
         if overlap <= 0:
@@ -96,51 +99,13 @@ def retrieve(query: str, top_k: int = 3) -> list[dict]:
     return results
 
 
-def _answer_with_openai(question: str, contexts: list[dict]) -> str:
-    from openai import OpenAI
-
-    client = OpenAI(api_key=OPENAI_API_KEY)
-    ctx = "\n\n".join(
-        f"[{c['title']}]\n{c['text']}" for c in contexts
-    ) or "(관련 문서 없음)"
-    messages = [
-        {
-            "role": "system",
-            "content": (
-                f"{AI_SYSTEM_PROMPT}\n"
-                "아래 참고 문서 내용만 근거로 답하세요. "
-                "문서에 없으면 모른다고 짧게 말하고, 대표번호 안내가 가능하면 안내하세요. "
-                "2~4문장으로 답하세요."
-            ),
-        },
-        {
-            "role": "user",
-            "content": f"참고 문서:\n{ctx}\n\n질문: {question}",
-        },
-    ]
-    completion = client.chat.completions.create(
-        model=OPENAI_MODEL,
-        messages=messages,
-        temperature=0.2,
-        max_tokens=350,
-    )
-    return (completion.choices[0].message.content or "").strip()
-
-
-def _answer_extractive(question: str, contexts: list[dict]) -> str:
-    if not contexts:
-        return (
-            "관련 안내를 찾지 못했습니다. "
-            "대표번호 02-1234-5678 로 문의해 주세요."
-        )
-    top = contexts[0]
-    body = top["text"].split("\n", 1)
-    detail = body[1].strip() if len(body) > 1 else top["text"]
-    return f"{detail}"
+def _body_from_chunk(chunk: dict) -> str:
+    body = chunk["text"].split("\n", 1)
+    return body[1].strip() if len(body) > 1 else chunk["text"]
 
 
 def answer(question: str, top_k: int = 3) -> dict:
-    """질문 → 검색 → 답변."""
+    """질문 → 문서 검색 → 문서 답변 또는 고정 멘트."""
     q = (question or "").strip()
     if not q:
         return {
@@ -148,29 +113,34 @@ def answer(question: str, top_k: int = 3) -> dict:
             "answer": "질문을 이해하지 못했습니다. 다시 말씀해 주세요.",
             "contexts": [],
             "mode": "none",
+            "matched": False,
         }
 
     contexts = retrieve(q, top_k=top_k)
-    mode = "extractive"
-    try:
-        if OPENAI_API_KEY:
-            text = _answer_with_openai(q, contexts)
-            mode = "openai_rag"
-        else:
-            text = _answer_extractive(q, contexts)
-    except Exception as exc:  # noqa: BLE001
-        # 할당량/네트워크 오류 시 문서 직접 인용
-        text = _answer_extractive(q, contexts)
-        mode = f"extractive_fallback:{type(exc).__name__}"
+    best = contexts[0]["score"] if contexts else 0.0
+
+    if not contexts or best < RAG_MIN_SCORE:
+        return {
+            "ok": True,
+            "answer": RAG_FALLBACK_MESSAGE,
+            "contexts": contexts,
+            "mode": "fallback_no_match",
+            "matched": False,
+            "best_score": best,
+            "question": q,
+        }
 
     return {
         "ok": True,
-        "answer": text,
+        "answer": _body_from_chunk(contexts[0]),
         "contexts": contexts,
-        "mode": mode,
+        "mode": "document",
+        "matched": True,
+        "best_score": best,
         "question": q,
     }
 
 
 def warmup() -> None:
+    load_chunks.cache_clear()
     load_chunks()
